@@ -34,13 +34,13 @@ public class Plip extends Creature {
      */
     public Plip(double e) {
         super("plip");
-        r = 99;
-        g = 0;
-        b = 76;
-        energy = e;
-
         // check energy boundary
+        energy = e;
         check_energy_bound();
+
+        r = 99;
+        g = (int)(63 + 96*energy);
+        b = 76;
     }
 
     /**

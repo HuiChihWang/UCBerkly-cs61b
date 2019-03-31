@@ -41,7 +41,7 @@ public class TestPlip {
     }
 
     @Test
-    public void testChoose() {
+    public void testChoosebyPlip() {
 
         // No empty adjacent spaces; stay.
         Plip p = new Plip(1.2);
