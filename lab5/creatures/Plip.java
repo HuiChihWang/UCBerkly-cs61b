@@ -6,9 +6,8 @@ import huglife.Action;
 import huglife.Occupant;
 
 import java.awt.Color;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Map;
+import java.util.*;
+
 
 /**
  * An implementation of a motile pacifist photosynthesizer.
@@ -35,10 +34,13 @@ public class Plip extends Creature {
      */
     public Plip(double e) {
         super("plip");
-        r = 0;
+        r = 99;
         g = 0;
-        b = 0;
+        b = 76;
         energy = e;
+
+        // check energy boundary
+        check_energy_bound();
     }
 
     /**
@@ -57,7 +59,7 @@ public class Plip extends Creature {
      * that you get this exactly correct.
      */
     public Color color() {
-        g = 63;
+        g = (int) (63 + 96*energy);
         return color(r, g, b);
     }
 
@@ -75,6 +77,8 @@ public class Plip extends Creature {
      */
     public void move() {
         // TODO
+        energy  -= 0.15;
+        check_energy_bound();
     }
 
 
@@ -83,6 +87,8 @@ public class Plip extends Creature {
      */
     public void stay() {
         // TODO
+        energy += 0.2;
+        check_energy_bound();
     }
 
     /**
@@ -91,7 +97,8 @@ public class Plip extends Creature {
      * Plip.
      */
     public Plip replicate() {
-        return this;
+        energy *= 0.5;
+        return new Plip(energy);
     }
 
     /**
@@ -115,16 +122,48 @@ public class Plip extends Creature {
         // (Google: Enhanced for-loop over keys of NEIGHBORS?)
         // for () {...}
 
-        if (false) { // FIXME
+
+        for (Direction d: neighbors.keySet()){
+            String neighborName = neighbors.get(d).name();
+            if(neighborName == "empty")
+                emptyNeighbors.add(d);
+            if(neighborName == "clorus")
+                anyClorus = true;
+        }
+
+        if (emptyNeighbors.isEmpty()) { // FIXME
             // TODO
+            return new Action(Action.ActionType.STAY);
         }
 
         // Rule 2
         // HINT: randomEntry(emptyNeighbors)
+        if (energy >= 1)
+            return new Action(Action.ActionType.REPLICATE, choose_from_empty(emptyNeighbors));
 
         // Rule 3
+        double p_move_thres = 0.5;
+        if(anyClorus && new Random().nextDouble() > p_move_thres)
+            return new Action(Action.ActionType.MOVE, choose_from_empty(emptyNeighbors));
 
         // Rule 4
         return new Action(Action.ActionType.STAY);
     }
+
+
+    /* helper function */
+    private void check_energy_bound(){
+        // check energy boundary
+        if (energy < 0)
+            energy = 0;
+        else if (energy > 2)
+            energy = 2;
+    }
+
+    private Direction choose_from_empty(Deque<Direction> emptyNeighbors){
+        int chosen_idx = new Random().nextInt(emptyNeighbors.toArray().length);
+        Direction chosen_dir = (Direction) emptyNeighbors.toArray()[chosen_idx];
+        return chosen_dir;
+    }
+
 }
