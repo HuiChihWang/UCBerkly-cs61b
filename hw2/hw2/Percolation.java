@@ -5,12 +5,13 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import java.util.HashMap;
 
 public class Percolation {
-    private WeightedQuickUnionUF UnionOfOpenSites;
+    private WeightedQuickUnionUF UnionOfTopVirtualSite;
+    private WeightedQuickUnionUF UnionOfBottomVirtualSite;
     private PercolationBoard StatesHolder;
     private int NumOfOpenSites;
     private int GridSize;
-    private int VirtualSourceIndex;
-    private int VirtualTargetIndex;
+    private int VirtualSiteIndex;
+    private boolean isPercolate;
 
     public Percolation(int N) {
         if (N <= 0)
@@ -18,10 +19,10 @@ public class Percolation {
 
         GridSize = N;
         NumOfOpenSites = 0;
-        VirtualSourceIndex = GridSize * GridSize;
-        VirtualTargetIndex = GridSize * GridSize + 1;
+        VirtualSiteIndex = GridSize * GridSize;
         StatesHolder = new PercolationBoard(GridSize);
-        UnionOfOpenSites = new WeightedQuickUnionUF(GridSize*GridSize + 2);
+        UnionOfTopVirtualSite = new WeightedQuickUnionUF(GridSize*GridSize + 1);
+        UnionOfBottomVirtualSite = new WeightedQuickUnionUF(GridSize*GridSize +1);
     }
 
     public static void main(String[] args){
@@ -37,8 +38,10 @@ public class Percolation {
         ConnectedToTarget(row, col);
 
         StatesHolder.SetState(DataType.State.OPEN, row, col);
-        ConnectToNeigbor(row, col);
         NumOfOpenSites += 1;
+
+        ConnectToNeigbor(row, col);
+        CheckIsPercolate(row, col);
     }
 
     public boolean isOpen(int row, int col){
@@ -48,9 +51,7 @@ public class Percolation {
 
     public boolean isFull(int row, int col){
         checkValidIndex(row, col);
-        boolean isFullCheckByUnion = UnionOfOpenSites.connected(VirtualSourceIndex, transformTo1DIndex(row,col));
-        boolean isFullCheckByBottom = CheckBottomFull(row,col);
-        return isFullCheckByUnion && isFullCheckByBottom;
+        return UnionOfTopVirtualSite.connected(VirtualSiteIndex, transformTo1DIndex(row, col));
     }
 
     public boolean isBlock(int row, int col){
@@ -63,7 +64,7 @@ public class Percolation {
     }
 
     public boolean percolates(){
-        return UnionOfOpenSites.connected(VirtualSourceIndex, VirtualTargetIndex);
+        return isPercolate;
     }
 
 
@@ -96,49 +97,26 @@ public class Percolation {
             if(neighbors.get(dir) == DataType.State.OPEN){
                 int[] neigbor_pos = getTranslationByDirection(dir, row, col);
                 int neigbor_index = transformTo1DIndex(neigbor_pos[0], neigbor_pos[1]);
-                UnionOfOpenSites.union(neigbor_index, current_index);
+                UnionOfTopVirtualSite.union(neigbor_index, current_index);
+                UnionOfBottomVirtualSite.union(neigbor_index,current_index);
             }
         }
-
     }
 
     private void ConnectedToSource(int row, int col){
         if(row == 0)
-            UnionOfOpenSites.union(VirtualSourceIndex, transformTo1DIndex(row, col));
+            UnionOfTopVirtualSite.union(VirtualSiteIndex, transformTo1DIndex(row, col));
     }
 
     private void ConnectedToTarget(int row, int col){
         if(row == GridSize-1)
-            UnionOfOpenSites.union(VirtualTargetIndex, transformTo1DIndex(row, col));
+            UnionOfBottomVirtualSite.union(VirtualSiteIndex, transformTo1DIndex(row, col));
     }
 
-    private boolean CheckBottomFull(int row, int col){
-
-        if(percolates() && row == GridSize - 1){
-            boolean isLeftConnect = IsBelongToSameSet(row, col, DataType.Direction.LEFT);
-            boolean isRightConnect = IsBelongToSameSet(row, col, DataType.Direction.RIGHT);
-            boolean isTopConnect = IsBelongToSameSet(row, col, DataType.Direction.TOP);
-
-            return isLeftConnect || isRightConnect || isTopConnect;
-        }
-        return true;
-    }
-
-    private boolean IsBelongToSameSet(int row, int col, DataType.Direction dir){
-        int[] shift_point  = getTranslationByDirection(dir, row, col);
-        int row_shift = shift_point[0];
-        int col_shift = shift_point[1];
-
-        if(IsPointInBound(row_shift, col_shift)){
-            int currentIdx = transformTo1DIndex(row,col);
-            int neighborIdx = transformTo1DIndex(row_shift,col_shift);
-            return UnionOfOpenSites.connected(currentIdx, neighborIdx);
-        }
-
-        return false;
-    }
-
-    private boolean IsPointInBound(int row, int col){
-        return row >=0 && row <= GridSize-1 && col >= 0 && col <= GridSize-1;
+    private void CheckIsPercolate(int row, int col){
+        int current_idx = transformTo1DIndex(row, col);
+        boolean isConnectToBottom = UnionOfBottomVirtualSite.connected(VirtualSiteIndex, current_idx);
+        boolean isConnectToTop = UnionOfTopVirtualSite.connected(VirtualSiteIndex, current_idx);
+        isPercolate = isConnectToBottom && isConnectToTop;
     }
 }
