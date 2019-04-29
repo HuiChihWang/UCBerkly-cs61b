@@ -22,11 +22,19 @@ public class Node<KeyType, ValueType> {
         right = node;
     }
 
-    public Node GetLeftNode(){
+    public void SetKey(KeyType key){
+        this.key = key;
+    }
+
+    public void SetValue(ValueType value){
+        this.value = value;
+    }
+
+    public Node<KeyType, ValueType> GetLeftNode(){
         return left;
     }
 
-    public Node GetRightNode(){
+    public Node<KeyType, ValueType> GetRightNode(){
         return right;
     }
 
@@ -38,4 +46,8 @@ public class Node<KeyType, ValueType> {
         return value;
     }
 
+    @Override
+    public String toString() {
+        return "(" + key.toString() +", " + value.toString() + ")";
+    }
 }
