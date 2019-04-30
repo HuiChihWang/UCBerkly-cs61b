@@ -1,4 +1,4 @@
-/*import org.junit.Test;
+import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class TestPalindrome {
@@ -15,4 +15,35 @@ public class TestPalindrome {
         }
         assertEquals("persiflage", actual);
     }
-}     Uncomment this class once you've created your Palindrome class. */
+
+    @Test
+    public void testIsPalindrome(){
+        assertTrue(palindrome.isPalindrome("sagas"));
+        assertTrue(palindrome.isPalindrome("sees"));
+        assertTrue(palindrome.isPalindrome("sexes"));
+
+        assertFalse(palindrome.isPalindrome("apple"));
+        assertFalse(palindrome.isPalindrome("test"));
+        assertFalse(palindrome.isPalindrome("ba"));
+
+        assertTrue(palindrome.isPalindrome(""));
+    }
+
+    @Test
+    public void testIsPalindromeOffByOne(){
+        CharacterComparator offByOne = new OffByOne();
+
+        assertTrue(palindrome.isPalindrome("flake", offByOne));
+        assertTrue(palindrome.isPalindrome("climb", offByOne));
+        assertTrue(palindrome.isPalindrome("edged", offByOne));
+        assertTrue(palindrome.isPalindrome("ab", offByOne));
+        assertTrue(palindrome.isPalindrome("shit", offByOne));
+
+        assertFalse(palindrome.isPalindrome("egg", offByOne));
+        assertFalse(palindrome.isPalindrome("sex", offByOne));
+        assertFalse(palindrome.isPalindrome("fuck", offByOne));
+        assertFalse(palindrome.isPalindrome("wow", offByOne));
+    }
+}
+
+/*Uncomment this class once you've created your Palindrome class. */

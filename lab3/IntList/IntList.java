@@ -118,16 +118,20 @@ public class IntList {
 
 
 
+    public static IntList reverse(IntList A){
+        IntList current = A;
+        IntList prev = null;
+        IntList next = null;
 
-
-
-
-
-
-
-
-
-
+        while(current != null){
+            next = current.rest;
+            current.rest = prev;
+            prev = current;
+            current = next;
+        }
+        A = prev;
+        return A;
+    }
 
 
     /**
