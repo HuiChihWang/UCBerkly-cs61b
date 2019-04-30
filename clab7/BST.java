@@ -11,12 +11,24 @@ public class BST<Key extends Comparable<Key>> {
     public BST() {
     }
 
+    public static <Key extends Comparable<Key>> BST<Key> CreateBST(){
+        return new BST<>();
+    }
+
     /**
      * Returns the number of keys in this BST.
      * @return the number of keys in this BST
      */
     public int size() {
         return size(root);
+    }
+
+    /**
+     * Returns average depth of this BST.
+     * @return average depth of this BST
+     */
+    public double getAverageDepth(){
+        return (double) calculateTreePathLength(root) / (double) size();
     }
 
     /**
@@ -236,6 +248,15 @@ public class BST<Key extends Comparable<Key>> {
         if      (cmp < 0) return contains(x.left, key);
         else if (cmp > 0) return contains(x.right, key);
         else              return true;
+    }
+
+    // calculate total path Length of Tree
+    private int calculateTreePathLength(Node Root){
+        if(Root == null)
+            return 0;
+        int leftTreePathLength = calculateTreePathLength(Root.left) + size(Root.left);
+        int rightTreePathLength = calculateTreePathLength(Root.right) + size(Root.right);
+        return leftTreePathLength + rightTreePathLength;
     }
 
 
