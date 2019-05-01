@@ -90,8 +90,11 @@ public class TestMyHashMap {
         }
         assertEquals(455, b.size()); //keys are there
         Set<String> keySet = b.keySet();
+
+        assertEquals(values.size(), keySet.size());
         assertTrue(values.containsAll(keySet));
         assertTrue(keySet.containsAll(values));
+
     }
 
     /*
