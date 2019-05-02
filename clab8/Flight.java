@@ -24,4 +24,9 @@ public class Flight {
     public int passengers() {
         return passengers;
     }
+
+    @Override
+    public String toString() {
+        return passengers + "(" + startTime + ", " + endTime + ")";
+    }
 }
