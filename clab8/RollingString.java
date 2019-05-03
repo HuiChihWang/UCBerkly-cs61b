@@ -3,8 +3,17 @@
  * in constant time and have a constant-time hash function. Used for the Rabin-Karp
  * string-matching algorithm.
  */
+
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.Iterator;
+
 class RollingString{
 
+    private Deque<Character> dequeChar;
+    private int maximumLength;
+    private int hashSum;
+    private int maxBase;
     /**
      * Number of total possible int values a character can take on.
      * DO NOT CHANGE THIS.
@@ -23,7 +32,18 @@ class RollingString{
      */
     public RollingString(String s, int length) {
         assert(s.length() == length);
-        /* FIX ME */
+
+        maximumLength = length;
+        dequeChar = new ArrayDeque<>();
+
+        int hashAcc = 0;
+        maxBase = 1;
+
+        for(int idx = 0; idx < s.length(); ++idx) {
+            dequeChar.add(s.charAt(idx));
+            hashSum = UNIQUECHARS*hashSum + (int)s.charAt(idx);
+            maxBase *= UNIQUECHARS;
+        }
     }
 
     /**
@@ -32,7 +52,11 @@ class RollingString{
      * Should be a constant-time operation.
      */
     public void addChar(char c) {
-        /* FIX ME */
+        dequeChar.add(c);
+        char cRm = dequeChar.remove();
+
+        hashSum  = UNIQUECHARS * hashSum -  (int)cRm * maxBase + (int) c;
+
     }
 
 
@@ -43,8 +67,10 @@ class RollingString{
      */
     public String toString() {
         StringBuilder strb = new StringBuilder();
-        /* FIX ME */
-        return "";
+        for(char c: dequeChar)
+            strb.append(c);
+
+        return strb.toString();
     }
 
     /**
@@ -52,8 +78,7 @@ class RollingString{
      * Should be a constant-time operation.
      */
     public int length() {
-        /* FIX ME */
-        return -1;
+        return maximumLength;
     }
 
 
@@ -64,8 +89,17 @@ class RollingString{
      */
     @Override
     public boolean equals(Object o) {
-        /* FIX ME */
-        return false;
+        if(o == null)
+            return false;
+        if(o.getClass() != this.getClass())
+            return false;
+
+        RollingString oRollingString = (RollingString) o;
+
+        if(oRollingString.length() != length())
+            return false;
+
+        return toString().equals(oRollingString.toString());
     }
 
     /**
@@ -74,7 +108,16 @@ class RollingString{
      */
     @Override
     public int hashCode() {
-        /* FIX ME */
-        return -1;
+        return hashSum % PRIMEBASE;
+    }
+
+    public static void main(String[] Args){
+        int x = 1;
+        for(int i = 1; i <= 14; ++i)
+            System.out.println(x *= 128);
+
+        String a = "abc";
+        System.out.println(a.charAt(0));
+
     }
 }
