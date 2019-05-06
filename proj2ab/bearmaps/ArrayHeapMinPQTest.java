@@ -1,6 +1,10 @@
 package bearmaps;
 
+import edu.princeton.cs.algs4.Stopwatch;
 import org.junit.Test;
+
+import java.util.Random;
+
 import static org.junit.Assert.*;
 
 
@@ -8,10 +12,68 @@ public class ArrayHeapMinPQTest {
     private ArrayHeapMinPQ<Integer> myArrayMinPQ;
     private NaiveMinPQ<Integer> ansArrayMinPQ;
 
-    public void SetUp(){
+    private void SetUp(){
         myArrayMinPQ = new ArrayHeapMinPQ<>();
         ansArrayMinPQ = new NaiveMinPQ<>();
     }
+
+    private double RumTimeTest(ExtrinsicMinPQ<Integer> testMinPQ, TestData testCase){
+        Integer[] items = testCase.items;
+        double[] priorities = testCase.priorities;
+        double[] changePriorities = testCase.changePriorities;
+
+        Stopwatch sw;
+
+        sw = new Stopwatch();
+        for(int i = 0; i < testCase.testNum; ++i){
+            testMinPQ.add(items[i], priorities[i]);
+        }
+        double addRuntime = sw.elapsedTime();
+
+        sw = new Stopwatch();
+        for(int i = 0; i < testCase.testNum; ++i){
+            testMinPQ.changePriority(items[i], changePriorities[i]);
+        }
+        double changeRuntime = sw.elapsedTime();
+
+        sw = new Stopwatch();
+        for(int i = 0; i < testCase.testNum; ++i){
+            testMinPQ.removeSmallest();
+        }
+        double removeRuntime = sw.elapsedTime();
+
+        System.out.printf("Add Runtime: %f, Change Runtime: %f, Remove Runtime: %f\n", addRuntime, changeRuntime, removeRuntime);
+        return addRuntime + changeRuntime + removeRuntime;
+    }
+
+    private class TestData{
+        public int testNum;
+        public Integer[] items;
+        public double[] priorities;
+        public double[] changePriorities;
+
+        public TestData(int testNum){
+            this.testNum = testNum;
+            createTestData();
+            randomAssignTestValue();
+        }
+
+        private void createTestData(){
+            items = new Integer[testNum];
+            priorities = new double[testNum];
+            changePriorities = new double[testNum];
+        }
+
+        private void randomAssignTestValue(){
+            for(int i = 0; i < testNum; ++i){
+                items[i] = i;
+                priorities[i] = Math.random();
+                changePriorities[i] = Math.random();
+            }
+        }
+    }
+
+
 
 
     @Test
@@ -117,10 +179,21 @@ public class ArrayHeapMinPQTest {
             double randomNewPriority = Math.random();
             ansArrayMinPQ.changePriority(i, randomNewPriority);
             myArrayMinPQ.changePriority(i, randomNewPriority);
-        } 
+        }
 
         for(int i = 0; i < testNum; ++i){
             assertEquals(ansArrayMinPQ.removeSmallest(), myArrayMinPQ.removeSmallest());
         }
+    }
+
+    @Test
+    public void TestRunTime(){
+        int testNum = 10000;
+        TestData testCase = new TestData(testNum);
+        SetUp();
+
+        double totalRuntimeMyMinPQ = RumTimeTest(myArrayMinPQ, testCase);
+        double totalRuntimeNaiveMinPQ = RumTimeTest(ansArrayMinPQ, testCase);
+
     }
 }
