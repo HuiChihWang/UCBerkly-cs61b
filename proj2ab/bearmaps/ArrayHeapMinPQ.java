@@ -1,7 +1,8 @@
 package bearmaps;
+import javax.annotation.processing.SupportedSourceVersion;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
+import java.util.NoSuchElementException;
 
 public class ArrayHeapMinPQ<ItemType> implements ExtrinsicMinPQ<ItemType> {
 
@@ -21,7 +22,6 @@ public class ArrayHeapMinPQ<ItemType> implements ExtrinsicMinPQ<ItemType> {
 
         arrayMinHeap.add(Node.CreateNode(item, priority));
         MinHeapifyFromBottom(arrayMinHeap, arrayMinHeap.size()-1);
-        numItems += 1;
     }
 
     @Override
@@ -34,22 +34,32 @@ public class ArrayHeapMinPQ<ItemType> implements ExtrinsicMinPQ<ItemType> {
 
     @Override
     public ItemType removeSmallest() {
-        Collections.swap(arrayMinHeap, ROOT_IDX, arrayMinHeap.size()-1);
-        Node<ItemType> removeNode = arrayMinHeap.remove(arrayMinHeap.size()-1);
+        if(size() == 0){
+            throw new NoSuchElementException();
+        }
 
-        MinHeapifyFromTop(arrayMinHeap, ROOT_IDX);
-
-        return removeNode.GetItem();
+        return removeInNode(arrayMinHeap, ROOT_IDX).GetItem();
     }
 
     @Override
     public void changePriority(ItemType item, double priority) {
+        Integer findIdx = findNodeIdx(arrayMinHeap, item, ROOT_IDX);
+        if(findIdx == null)
+            throw new NoSuchElementException();
 
+        if(arrayMinHeap.get(findIdx).GetPriority() == priority)
+            return;
+
+        Node<ItemType> modifyNode = removeInNode(arrayMinHeap, findIdx);
+        modifyNode.SetPririty(priority);
+
+        add(item, priority);
     }
 
     @Override
     public boolean contains(ItemType item) {
-        return false;
+        Integer findIdx = findNodeIdx(arrayMinHeap, item, ROOT_IDX);
+        return findIdx != null;
     }
 
     @Override
@@ -57,11 +67,15 @@ public class ArrayHeapMinPQ<ItemType> implements ExtrinsicMinPQ<ItemType> {
         return arrayMinHeap.size()-1;
     }
 
-    private void MinHeapifyFromBottom(ArrayList<Node<ItemType>> arrayHeap, int startIdx){
-        int parentIdx = getParentIdx(startIdx);
+    public void printHeap(){
+        PrintHeapDemo.printSimpleArrayListHeap(arrayMinHeap);
+    }
 
-        if(parentIdx == ROOT_IDX)
+    private void MinHeapifyFromBottom(ArrayList<Node<ItemType>> arrayHeap, int startIdx){
+        if(startIdx == ROOT_IDX)
             return;
+
+        int parentIdx = getParentIdx(startIdx);
 
         if(arrayHeap.get(parentIdx).GetPriority() > arrayHeap.get(startIdx).GetPriority()){
             Collections.swap(arrayHeap, startIdx, parentIdx);
@@ -73,15 +87,15 @@ public class ArrayHeapMinPQ<ItemType> implements ExtrinsicMinPQ<ItemType> {
         int leftIdx = getLeftIdx(startIdx);
         int rightIdx = getRightIdx(startIdx);
 
-        if(leftIdx > size()){
+        if(leftIdx >= arrayHeap.size() && rightIdx >= arrayHeap.size()){
             return;
         }
 
-        if(rightIdx > size() && leftIdx <= size()){
+        if(rightIdx >= arrayHeap.size() && leftIdx <= arrayHeap.size()-1){
             if(arrayHeap.get(leftIdx).GetPriority() < arrayHeap.get(startIdx).GetPriority()){
                 Collections.swap(arrayHeap, startIdx, leftIdx);
-                return;
             }
+            return;
         }
 
         Node<ItemType> leftNode = arrayHeap.get(leftIdx);
@@ -101,6 +115,40 @@ public class ArrayHeapMinPQ<ItemType> implements ExtrinsicMinPQ<ItemType> {
             MinHeapifyFromTop(arrayHeap, rightIdx);
         }
 
+    }
+
+    private Node<ItemType> removeInNode(ArrayList<Node<ItemType>> arrayHeap, int removeIdx){
+        Collections.swap(arrayHeap, removeIdx, arrayHeap.size()-1);
+        Node<ItemType> removeNode = arrayMinHeap.remove(arrayMinHeap.size()-1);
+
+        MinHeapifyFromTop(arrayMinHeap, removeIdx);
+
+        if(removeIdx != ROOT_IDX) {
+            if (arrayHeap.get(removeIdx).GetPriority() < arrayHeap.get(getParentIdx(removeIdx)).GetPriority()) {
+                MinHeapifyFromBottom(arrayHeap, removeIdx);
+            }
+        }
+        return removeNode;
+    }
+
+    private Integer findNodeIdx(ArrayList<Node<ItemType>> arrayHeap, ItemType item, int startIdx){
+        if(startIdx >= arrayHeap.size()){
+            return null;
+        }
+
+        if(arrayHeap.get(startIdx).GetItem().equals(item)){
+            return startIdx;
+        }
+
+        Integer findLeftIdx = findNodeIdx(arrayHeap, item, getLeftIdx(startIdx));
+        Integer findRightIdx = findNodeIdx(arrayHeap, item, getRightIdx(startIdx));
+
+        if(findLeftIdx != null)
+            return findLeftIdx;
+        if(findRightIdx != null)
+            return findRightIdx;
+
+        return null;
     }
 
     private int getParentIdx(int childIdx){

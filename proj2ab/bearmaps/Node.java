@@ -37,4 +37,9 @@ public class Node<ItemType>{
     public void SetPririty(double priority){
         this.priority = priority;
     }
+
+    @Override
+    public String toString() {
+        return "(" + item.toString() + ", " + priority +")";
+    }
 }

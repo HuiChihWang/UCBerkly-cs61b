@@ -1,5 +1,7 @@
 package bearmaps;
 
+import java.util.ArrayList;
+
 /**
  * Created by hug.
  */
@@ -18,6 +20,29 @@ public class PrintHeapDemo {
 
         for (int i = 1; i < heap.length; i++) {
             System.out.printf("%d ", heap[i]);
+            if (i == itemsUntilNext) {
+                System.out.println();
+                level++;
+                itemsUntilNext += Math.pow(2, level);
+                depth--;
+                for (int j = 0; j < depth; j++) {
+                    System.out.print(" ");
+                }
+            }
+        }
+        System.out.println();
+    }
+
+    public static void printSimpleArrayListHeap(ArrayList heap) {
+        int depth = ((int) (Math.log(heap.size()) / Math.log(2)));
+        int level = 0;
+        int itemsUntilNext = (int) Math.pow(2, level);
+        for (int j = 0; j < depth; j++) {
+            System.out.print(" ");
+        }
+
+        for (int i = 1; i < heap.size(); i++) {
+            System.out.print(heap.get(i));
             if (i == itemsUntilNext) {
                 System.out.println();
                 level++;
