@@ -34,7 +34,7 @@ public class Node<ItemType>{
         this.item = item;
     }
 
-    public void SetPririty(double priority){
+    public void SetPriority(double priority){
         this.priority = priority;
     }
 
