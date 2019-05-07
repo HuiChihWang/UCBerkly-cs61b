@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.HashSet;
 
-public class KDTree {
+public class  KDTree {
     public static int COMPARE_X = 0;
     public static int COMPARE_Y = 1;
 
@@ -46,12 +46,15 @@ public class KDTree {
     private void CreateKDTree(List<Point> pointList){
         Iterator<Point> itPointList = pointList.iterator();
 
-        KDTreeRoot = new KDTreeNode(itPointList.next(), COMPARE_X);
+        Point pointRoot = itPointList.next();
+        KDTreeRoot = new KDTreeNode(pointRoot, COMPARE_X);
+        pointInTree.add(pointRoot);
 
         while(itPointList.hasNext()){
             Point p = itPointList.next();
             if(!contains(p)){
                 addPointToTree(p);
+                pointInTree.add(p);
             }
         }
     }
