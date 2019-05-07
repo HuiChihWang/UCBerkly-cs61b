@@ -147,6 +147,7 @@ public class ArrayHeapMinPQ<ItemType> implements ExtrinsicMinPQ<ItemType> {
     private int getRightIdx(int parentIdx){
         return 2 * parentIdx + 1;
     }
+
     private boolean greater(int i, int j){
         return arrayMinHeap.get(i).GetPriority() > arrayMinHeap.get(j).GetPriority();
     }

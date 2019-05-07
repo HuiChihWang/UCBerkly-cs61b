@@ -31,9 +31,9 @@ public class ArrayHeapMinPQTest {
         double addRuntime = sw.elapsedTime();
 
         sw = new Stopwatch();
-        for(int i = 0; i < testCase.testNum; ++i){
-            testMinPQ.changePriority(items[i], changePriorities[i]);
-        }
+//        for(int i = 0; i < testCase.testNum; ++i){
+//            testMinPQ.changePriority(items[i], changePriorities[i]);
+//        }
         double changeRuntime = sw.elapsedTime();
 
         sw = new Stopwatch();
