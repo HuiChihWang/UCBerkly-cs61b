@@ -21,7 +21,8 @@ public class  KDTree {
     }
 
     public Point nearest(double x, double y){
-        return null;
+        Point findNearPoint = FindNearestRecursive(KDTreeRoot, new Point(x,y), null);
+        return new Point(findNearPoint.getX(), findNearPoint.getY());
     }
 
     public void printKDTree(){
@@ -93,6 +94,36 @@ public class  KDTree {
         return pointInTree.contains(p);
     }
 
+    private Point FindNearestRecursive(KDTreeNode root, Point inputPoint, Point nearestPoint){
+        if(root == null)
+            return nearestPoint;
+
+        if(nearestPoint == null || root.DistSqFrom(inputPoint) < Point.distance(inputPoint, nearestPoint)){
+            nearestPoint = root.point;
+        }
+
+        KDTreeNode nextGoodSide;
+        KDTreeNode nextBadSide;
+
+        if(root.greater(inputPoint)){
+            nextGoodSide = root.leftNode;
+            nextBadSide = root.rightNode;
+        }
+        else{
+            nextGoodSide = root.rightNode;
+            nextBadSide = root.leftNode;
+        }
+
+        nearestPoint = FindNearestRecursive(nextGoodSide, inputPoint, nearestPoint);
+
+
+        if(Point.distance(inputPoint, nearestPoint) > root.BoundaryDistSqFrom(inputPoint)){
+            nearestPoint = FindNearestRecursive(nextBadSide, inputPoint, nearestPoint);
+        }
+
+        return nearestPoint;
+    }
+
     private class KDTreeNode{
         Point point;
         KDTreeNode leftNode;
@@ -109,6 +140,14 @@ public class  KDTree {
         boolean greater(Point point){
             return compareArray.get(compareChooseIdx).compare(this.point, point) > 0;
 
+        }
+
+        double BoundaryDistSqFrom(Point p){
+            return compareChooseIdx == COMPARE_X ? Math.pow(p.getX() - point.getX(), 2) : Math.pow(p.getY() - point.getY(), 2);
+        }
+
+        double DistSqFrom(Point p){
+            return Point.distance(point, p);
         }
 
         @Override

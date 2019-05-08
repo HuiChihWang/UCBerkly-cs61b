@@ -33,12 +33,22 @@ public class KDTreeTest {
     }
 
     @Test
-    public void TestNearestPoint(){
+    public void TestNearestPointBasic(){
         TestCase testCaseBasic = TestCase.GetTestCaseBasic();
         KDTree kdtree = new KDTree(testCaseBasic.pointList);
 
         for(Point p: testCaseBasic.mapInputAns.keySet()){
             assertEquals(testCaseBasic.mapInputAns.get(p), kdtree.nearest(p.getX(), p.getY()));
+        }
+    }
+
+    @Test
+    public void TestNearestPointMedium(){
+        TestCase testCaseMedium = TestCase.GetTestCaseMedium();
+        KDTree kdtree = new KDTree(testCaseMedium.pointList);
+
+        for(Point p: testCaseMedium.mapInputAns.keySet()){
+            assertEquals(testCaseMedium.mapInputAns.get(p), kdtree.nearest(p.getX(), p.getY()));
         }
     }
 }
