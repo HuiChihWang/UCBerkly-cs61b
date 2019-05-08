@@ -1,11 +1,38 @@
 package bearmaps;
 
+
+import edu.princeton.cs.algs4.Stopwatch;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
-import java.util.List;
-import java.util.HashMap;
+import static org.junit.Assert.assertTrue;
+
 
 public class KDTreeTest {
+
+    public double TimeTestNaivePoint(TestCase testInput){
+
+        NaivePointSet nn = new NaivePointSet(testInput.pointList);
+
+        Stopwatch sw = new Stopwatch();
+        for(Point p: testInput.mapInputAns.keySet()) {
+            nn.nearest(p.getX(), p.getY());
+        }
+
+        return sw.elapsedTime();
+    }
+
+    public double TimeTestKDTree(TestCase testInput){
+        KDTree kdtree = new KDTree(testInput.pointList);
+
+        Stopwatch sw = new Stopwatch();
+        for(Point p: testInput.mapInputAns.keySet()) {
+            kdtree.nearest(p.getX(), p.getY());
+        }
+
+        return sw.elapsedTime();
+    }
+
+
     @Test
     public void TestNaivePointSet(){
         TestCase testCaseBasic = TestCase.GetTestCaseBasic();
@@ -65,10 +92,23 @@ public class KDTreeTest {
 
     @Test
     public void TestNearestRandomCase(){
-        TestCase testCaseRandom = TestCase.GetRandomCase(10000,1000,10);
+        TestCase testCaseRandom = TestCase.GetRandomCase(20000,10000,100);
         KDTree kdtree = new KDTree(testCaseRandom.pointList);
         for(Point p: testCaseRandom.mapInputAns.keySet()){
             assertEquals(testCaseRandom.mapInputAns.get(p), kdtree.nearest(p.getX(), p.getY()));
         }
+    }
+
+    @Test
+    public void TestRunTimeNearest(){
+        TestCase testCaseRandom = TestCase.GetRandomCase(100000,10000,100);
+
+        double naiveRunTime = TimeTestNaivePoint(testCaseRandom);
+        double kdTreeRunTime = TimeTestKDTree(testCaseRandom);
+
+        System.out.printf("Naive Runtime: %f \n", naiveRunTime);
+        System.out.printf("KDTree Runtime: %f \n", kdTreeRunTime);
+
+        assertTrue(kdTreeRunTime / naiveRunTime < 0.1);
     }
 }

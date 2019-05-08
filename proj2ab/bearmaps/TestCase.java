@@ -75,7 +75,6 @@ public class TestCase{
 
         for(int i = 0; i < testNum; ++i){
             Point randomPoint = GenerateRandomPoint(randGen, rangeMin, rangeMax);
-            System.out.println(randomPoint);
             inputList.add(randomPoint);
             ansList.add(ansGenerator.nearest(randomPoint.getX(), randomPoint.getY()));
         }
