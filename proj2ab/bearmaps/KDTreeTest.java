@@ -51,4 +51,24 @@ public class KDTreeTest {
             assertEquals(testCaseMedium.mapInputAns.get(p), kdtree.nearest(p.getX(), p.getY()));
         }
     }
+
+    @Test
+    public void TestCaseGeneration(){
+        int pointNum = 1000;
+        int testNum = 100;
+        TestCase testCaseRandom = TestCase.GetRandomCase(pointNum,testNum,10);
+
+
+        assertEquals(pointNum, testCaseRandom.pointList.size());
+        assertEquals(testNum, testCaseRandom.mapInputAns.size());
+    }
+
+    @Test
+    public void TestNearestRandomCase(){
+        TestCase testCaseRandom = TestCase.GetRandomCase(10000,1000,10);
+        KDTree kdtree = new KDTree(testCaseRandom.pointList);
+        for(Point p: testCaseRandom.mapInputAns.keySet()){
+            assertEquals(testCaseRandom.mapInputAns.get(p), kdtree.nearest(p.getX(), p.getY()));
+        }
+    }
 }

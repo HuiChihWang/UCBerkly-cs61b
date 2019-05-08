@@ -1,7 +1,11 @@
 package bearmaps;
 
+import org.junit.Test;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class TestCase{
     List<Point> pointList;
@@ -56,6 +60,42 @@ public class TestCase{
         return new TestCase(pointList, inputList, ansList);
     }
 
+    public static TestCase GetRandomCase(int pointSetNum, int testNum, long seed){
+        Random randGen = new Random(seed);
+        double rangeMin = -200.;
+        double rangeMax = 200.;
+        ArrayList<Point> pointList = new ArrayList<>();
+        for(int i = 0; i < pointSetNum; ++i){
+            pointList.add(GenerateRandomPoint(randGen, rangeMin,rangeMax));
+        }
+
+        ArrayList<Point> inputList = new ArrayList<>();
+        ArrayList<Point> ansList = new ArrayList<>();
+        NaivePointSet ansGenerator = new NaivePointSet(pointList);
+
+        for(int i = 0; i < testNum; ++i){
+            Point randomPoint = GenerateRandomPoint(randGen, rangeMin, rangeMax);
+            System.out.println(randomPoint);
+            inputList.add(randomPoint);
+            ansList.add(ansGenerator.nearest(randomPoint.getX(), randomPoint.getY()));
+        }
+
+        return new TestCase(pointList, inputList, ansList);
+    }
+
+    private static Point GenerateRandomPoint(Random randGen, double rangeMin, double rangeMax){
+        double r = rangeMax - rangeMin;
+        double x = rangeMin + r * randGen.nextDouble();
+        double y = rangeMin + r * randGen.nextDouble();
+        return new Point(x, y);
+    }
+
+    public static void main(String[] Args){
+        Random randGen = new Random(1);
+        for(int i = 0; i < 10 ; ++i){
+            System.out.println(GenerateRandomPoint(randGen, 0, 100));
+        }
+    }
 }
 
 
