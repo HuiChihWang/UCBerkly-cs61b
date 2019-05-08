@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.HashSet;
 
 public class  KDTree {
-    public static int COMPARE_X = 0;
-    public static int COMPARE_Y = 1;
+    private static int COMPARE_X = 0;
+    private static int COMPARE_Y = 1;
 
     private KDTreeNode KDTreeRoot;
     private ArrayList<Comparator<Point>> compareArray;
@@ -67,16 +67,15 @@ public class  KDTree {
         while(start != null){
             prev = start;
 
-            if(start.smaller(p)){
-                fromLeft = false;
-                start = start.rightNode;
-            }
-            else{
+            if(start.greater(p)){
                 fromLeft = true;
                 start = start.leftNode;
             }
+            else{
+                fromLeft = false;
+                start = start.rightNode;
+            }
         }
-
         CreateNewNode(p, prev, fromLeft);
     }
 
@@ -95,22 +94,20 @@ public class  KDTree {
     }
 
     private class KDTreeNode{
+        Point point;
+        KDTreeNode leftNode;
+        KDTreeNode rightNode;
+        int compareChooseIdx;
 
-
-        public Point point;
-        public KDTreeNode leftNode;
-        public KDTreeNode rightNode;
-        public int compareChooseIdx;
-
-        public KDTreeNode(Point point, int comparator){
+        KDTreeNode(Point point, int comparator){
             this.point = point;
             leftNode = null;
             rightNode = null;
             compareChooseIdx = comparator;
         }
 
-        public boolean smaller(Point point){
-            return compareArray.get(compareChooseIdx).compare(this.point, point) < 0;
+        boolean greater(Point point){
+            return compareArray.get(compareChooseIdx).compare(this.point, point) > 0;
 
         }
 
@@ -119,5 +116,10 @@ public class  KDTree {
             String compareOption = compareChooseIdx == COMPARE_X ? "COMPARE_X" : "COMPARE_Y";
             return String.format("(%.2f, %.2f, %s)",point.getX(), point.getY(), compareOption);
         }
+    }
+
+    public static void main(String[] Args){
+        Comparator<Point> cmp = Comparator.comparingDouble(Point::getX);
+        int i = cmp.compare(new Point(4.,5.), new Point(4.,4.));
     }
 }
