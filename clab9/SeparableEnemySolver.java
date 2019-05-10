@@ -24,26 +24,29 @@ public class SeparableEnemySolver {
      */
     public boolean isSeparable() {
 
-        HashSet<String> markSet = new HashSet<>();
+        HashMap<String, Boolean> markMap = new HashMap<>();
+        markMap.put("", false);
+
         for(String label: g.labels()) {
-            if(!markSet.contains(label)){
-                if(!CheckSeperableByDFS(label, "", markSet)){
-                    return false;
-                }
+            if(!CheckSeperableByDFS(label, "", markMap)){
+                return false;
             }
         }
         return true;
     }
 
-    private boolean CheckSeperableByDFS(String current, String prev, HashSet<String> markSet){
-        markSet.add(current);
+    private boolean CheckSeperableByDFS(String current, String prev, HashMap<String, Boolean> markMap){
+        if(markMap.containsKey(current))
+            return true;
+
+        markMap.put(current, !markMap.get(prev));
         for(String neighbor: g.neighbors(current)){
             if(!prev.equals(neighbor)) {
+                if (markMap.containsKey(neighbor))
+                    if(markMap.get(neighbor) == markMap.get(current))
+                        return false;
 
-                if (markSet.contains(neighbor))
-                    return false;
-
-                if (!CheckSeperableByDFS(neighbor, current, markSet))
+                if (!CheckSeperableByDFS(neighbor, current, markMap))
                     return false;
             }
         }
