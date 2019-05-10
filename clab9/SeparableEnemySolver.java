@@ -23,8 +23,32 @@ public class SeparableEnemySolver {
      * Returns true if input is separable, false otherwise.
      */
     public boolean isSeparable() {
-        // TODO: Fix me
-        return false;
+
+        HashSet<String> markSet = new HashSet<>();
+        for(String label: g.labels()) {
+            if(!markSet.contains(label)){
+                if(!CheckSeperableByDFS(label, "", markSet)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean CheckSeperableByDFS(String current, String prev, HashSet<String> markSet){
+        markSet.add(current);
+        for(String neighbor: g.neighbors(current)){
+            if(!prev.equals(neighbor)) {
+
+                if (markSet.contains(neighbor))
+                    return false;
+
+                if (!CheckSeperableByDFS(neighbor, current, markSet))
+                    return false;
+            }
+        }
+
+        return true;
     }
 
 
