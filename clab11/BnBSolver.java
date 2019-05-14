@@ -10,8 +10,18 @@ import java.util.List;
  */
 public class BnBSolver {
 
+    private List<Bear> sortedBears;
+    private List<Bed> sortedBeds;
+    private List<Bear> bears;
+    private List<Bed> beds;
+
     public BnBSolver(List<Bear> bears, List<Bed> beds) {
-        // TODO: Fix me.
+        this.bears = bears;
+        this.beds = beds;
+        sortedBears = new ArrayList<>();
+        sortedBeds = new ArrayList<>();
+
+        
     }
 
     /**
