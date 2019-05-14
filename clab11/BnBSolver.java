@@ -21,7 +21,46 @@ public class BnBSolver {
         sortedBears = new ArrayList<>();
         sortedBeds = new ArrayList<>();
 
-        
+    }
+
+    private void SolveByQuickSort(){
+        ArrayList<Bed> smaller = new ArrayList<>();
+        ArrayList<Bed> greater = new ArrayList<>();
+
+
+        Bear pivot = bears.get(0);
+        partitionInitial(pivot, smaller, greater);
+
+        for(int i = 1; i < bears.size(); ++i){
+
+            if(sortedBeds.get(sortedBeds.size()-1).compareTo(pivot) > 0){
+                partition(pivot, smaller, greater);
+            }
+            else if(sortedBeds.get(sortedBeds.size()-1).compareTo(pivot) < 0){
+
+            }
+
+
+        }
+    }
+
+    private void partition(ArrayList<Bed> input, int pivotIdx){
+
+
+    }
+
+    private void partitionInitial(Bear pivot, ArrayList<Bed> smaller, ArrayList<Bed> greater){
+        for(Bed bed: beds){
+            if(bed.compareTo(pivot) < 0) {
+                smaller.add(bed);
+            }
+            else if(bed.compareTo(pivot) > 0){
+                greater.add(bed);
+            }
+            else{
+                sortedBeds.add(bed);
+            }
+        }
     }
 
     /**
