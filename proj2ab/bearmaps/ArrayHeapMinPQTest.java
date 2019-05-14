@@ -31,9 +31,9 @@ public class ArrayHeapMinPQTest {
         double addRuntime = sw.elapsedTime();
 
         sw = new Stopwatch();
-//        for(int i = 0; i < testCase.testNum; ++i){
-//            testMinPQ.changePriority(items[i], changePriorities[i]);
-//        }
+        for(int i = 0; i < testCase.testNum; ++i){
+            testMinPQ.changePriority(items[i], changePriorities[i]);
+        }
         double changeRuntime = sw.elapsedTime();
 
         sw = new Stopwatch();
@@ -94,7 +94,6 @@ public class ArrayHeapMinPQTest {
             myArrayMinPQ.add(testItem[i], testPriority[i]);
         }
 
-        myArrayMinPQ.printHeap();
         assertEquals(1, (int) myArrayMinPQ.getSmallest());
 
         for(int i = 0; i < testItem.length; ++i){
@@ -156,7 +155,6 @@ public class ArrayHeapMinPQTest {
             myArrayMinPQ.changePriority(testItem[i], testNewPriority[i]);
         }
 
-        myArrayMinPQ.printHeap();
         assertEquals(0, (int) myArrayMinPQ.getSmallest());
 
         for(int i = 0; i < testItem.length; ++i){
@@ -188,7 +186,7 @@ public class ArrayHeapMinPQTest {
 
     @Test
     public void TestRunTime(){
-        int testNum = 10000;
+        int testNum = 20000;
         TestData testCase = new TestData(testNum);
         SetUp();
 

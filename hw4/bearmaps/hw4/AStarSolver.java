@@ -1,5 +1,6 @@
 package bearmaps.hw4;
 
+import bearmaps.proj2ab.ArrayHeapMinPQ;
 import bearmaps.proj2ab.DoubleMapPQ;
 import bearmaps.proj2ab.ExtrinsicMinPQ;
 import edu.princeton.cs.algs4.Stopwatch;
@@ -11,7 +12,7 @@ import java.util.List;
 public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
 
     private SolverOutcome solveState;
-    private List<Vertex> shortestPath;
+    private LinkedList<Vertex> shortestPath;
     private double elapsedTime;
     private double shortestPathLength;
     private int numDequeueOperation;
@@ -70,7 +71,7 @@ public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
         for(WeightedEdge<Vertex> neighborEdge: graph.neighbors(current)){
             double distToCurrent = shortestDistFromStartToVertex(neighborEdge.from());
             double edgeLength = neighborEdge.weight();
-            double distToNeighbor = mapDistToVertex.get(neighborEdge.to());
+            double distToNeighbor = shortestDistFromStartToVertex(neighborEdge.to());
 
             if(distToCurrent + edgeLength < distToNeighbor){
                 UpdateShortestDistFromStart(neighborEdge.to(), neighborEdge.from(), distToCurrent + edgeLength);
@@ -112,7 +113,7 @@ public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
     }
 
     private boolean isSearchEnded(){
-        return vertexStatePQ.size() == 0 || vertexStatePQ.getSmallest().equals(endVertex) || isTimeExceed();
+        return isVertexStatePQEmpty() || vertexStatePQ.getSmallest().equals(endVertex) || isTimeExceed();
     }
 
     private boolean isTimeExceed(){
@@ -142,13 +143,9 @@ public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
     private void setShortestPath(){
         if(solveState == SolverOutcome.SOLVED){
             Vertex start = endVertex;
-            while(true){
-                shortestPath.add(start);
+            while(start !=  null){
+                shortestPath.addFirst(start);
                 start = mapVertexToCurrent.get(start);
-
-                if(start.equals(startVertex)){
-                    break;
-                }
             }
         }
     }
