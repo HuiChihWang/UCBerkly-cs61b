@@ -62,7 +62,7 @@ public class AStarSolver<Vertex> implements ShortestPathsSolver<Vertex> {
     }
 
     private void SolverInit(){
-        vertexStatePQ = new DoubleMapPQ<>();
+        vertexStatePQ = new ArrayHeapMinPQ<>();
         mapDistToVertex = new HashMap<>();
         mapVertexToCurrent = new HashMap<>();
     }
