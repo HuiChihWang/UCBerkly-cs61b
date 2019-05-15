@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static bearmaps.proj2c.utils.Constants.SEMANTIC_STREET_GRAPH;
-import static bearmaps.proj2c.utils.Constants.ROUTE_LIST;
+import static bearmaps.proj2c.utils.Constants.*;
 
 /**
  * Handles requests from the web browser for map images. These images
@@ -84,12 +83,83 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
      */
     @Override
     public Map<String, Object> processRequest(Map<String, Double> requestParams, Response response) {
-        //System.out.println("yo, wanna know the parameters given by the web browser? They are:");
-        //System.out.println(requestParams);
+        System.out.println("yo, wanna know the parameters given by the web browser? They are:");
+        System.out.println(requestParams);
         Map<String, Object> results = new HashMap<>();
         System.out.println("Since you haven't implemented RasterAPIHandler.processRequest, nothing is displayed in "
                 + "your browser.");
+
+        double leftTopLon = requestParams.get("ullon");
+        double rightBottomLon = requestParams.get("lrlon");
+        double leftTopLat = requestParams.get("ullat");
+        double rightBottomLat = requestParams.get("lrlat");
+        double queryBoxWidth = requestParams.get("w");
+        double queryBoxHeight = requestParams.get("h");
+
+        double targetLonDPP = (rightBottomLon - leftTopLon) / queryBoxWidth;
+        double startLonDPP = (ROOT_LRLON - ROOT_ULLON) / TILE_SIZE;
+
+        int level = 0;
+        while(startLonDPP > targetLonDPP){
+            startLonDPP /= 2.;
+            level += 1;
+        }
+
+        double gridSize = Math.pow(2., level);
+        double gridLengthLon = (ROOT_LRLON - ROOT_ULLON) / gridSize;
+        double gridLengthLat = (ROOT_ULLAT - ROOT_LRLAT) / gridSize;
+
+        int[] BoxLongtitudeIdx = findBoxIdx(leftTopLon - ROOT_ULLON, rightBottomLon - ROOT_ULLON, gridLengthLon);
+        int[] BoxLatitudeIdx = findBoxIdx(rightBottomLat - ROOT_LRLAT, leftTopLat - ROOT_LRLAT, gridLengthLat);
+
+        int longtitudeIdxStart = BoxLongtitudeIdx[0];
+        int longtitudeIdxEnd = BoxLongtitudeIdx[1];
+        int latitudeIdxStart = BoxLatitudeIdx[0];
+        int latitudeIdxEnd = BoxLatitudeIdx[1];
+
+        int queryBoxGridSizeLon = longtitudeIdxEnd - longtitudeIdxStart + 1;
+        int queryBoxGridSizeLat = latitudeIdxEnd - latitudeIdxStart + 1;
+
+        String[][] imageNames = new String[queryBoxGridSizeLat][queryBoxGridSizeLon];
+
+        int i = 0;
+        for(int latIdx = latitudeIdxStart; latIdx <= latitudeIdxEnd; ++latIdx){
+            imageNames[i] = new String[queryBoxGridSizeLon];
+
+            int j = 0;
+            for(int lonIdx = longtitudeIdxStart; lonIdx <= longtitudeIdxEnd; ++lonIdx){
+                imageNames[i][j] = String.format("d%d_x%d_y%d.png", level, latIdx, lonIdx);
+                j += 1;
+            }
+            i += 1;
+        }
+
+        double queryBoxLeftTopLongtitude = ROOT_ULLON + longtitudeIdxStart * gridLengthLon;
+        double queryBoxRightBottomLongtitude = queryBoxLeftTopLongtitude + queryBoxGridSizeLon * gridLengthLon;
+        double queryBoxRightBottomLatitude = ROOT_LRLAT + latitudeIdxStart * gridLengthLat;
+        double queryBoxLefTopLatitude = queryBoxRightBottomLatitude + queryBoxGridSizeLat * gridLengthLat;
+
+        results.put("render_grid", imageNames);
+        results.put("raster_ul_lon", queryBoxLeftTopLongtitude);
+        results.put("raster_lr_lon", queryBoxRightBottomLongtitude);
+        results.put("raster_lr_lat", queryBoxRightBottomLatitude);
+        results.put("raster_ul_lat", queryBoxLefTopLatitude);
+        results.put("depth" , level);
+        results.put("query_success", true);
+
         return results;
+    }
+
+    private int[] findBoxIdx(double Left, double Right, double gridLength){
+        int[] idxArray = new int[2];
+        idxArray[0] = (int) (Left / gridLength);
+
+        if(Right == gridLength)
+            idxArray[1] = (int)(Right / gridLength) - 1;
+        else
+            idxArray[1] = (int)(Right / gridLength);
+
+        return idxArray;
     }
 
     @Override

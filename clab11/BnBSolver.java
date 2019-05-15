@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -10,7 +11,6 @@ import java.util.List;
  */
 public class BnBSolver {
 
-    private List<Bear> sortedBears;
     private List<Bed> sortedBeds;
     private List<Bear> bears;
     private List<Bed> beds;
@@ -18,44 +18,69 @@ public class BnBSolver {
     public BnBSolver(List<Bear> bears, List<Bed> beds) {
         this.bears = bears;
         this.beds = beds;
-        sortedBears = new ArrayList<>();
         sortedBeds = new ArrayList<>();
+
+        SolveByQuickSort();
 
     }
 
     private void SolveByQuickSort(){
         ArrayList<Bed> smaller = new ArrayList<>();
         ArrayList<Bed> greater = new ArrayList<>();
-
+        HashMap<Bed, Boolean> mapState = new HashMap<>();
 
         Bear pivot = bears.get(0);
-        partitionInitial(pivot, smaller, greater);
+        partitionInitial(pivot, mapState);
 
         for(int i = 1; i < bears.size(); ++i){
+            pivot = bears.get(i);
 
             if(sortedBeds.get(sortedBeds.size()-1).compareTo(pivot) > 0){
-                partition(pivot, smaller, greater);
+                partitionLeft(pivot, mapState);
             }
             else if(sortedBeds.get(sortedBeds.size()-1).compareTo(pivot) < 0){
-
+                partitionRight(pivot, smaller, greater);
             }
 
 
         }
     }
 
-    private void partition(ArrayList<Bed> input, int pivotIdx){
+    private void partitionRight(Bear pivot, HashMap<Bed, Boolean>){
+        for(int i = 0; i < greater.size(); ++i){
+            if(pivot.compareTo(greater.get(i)) >= 0){
+                Bed bedRm = greater.remove(i);
 
-
+                if(pivot.compareTo(bedRm) == 0)
+                    sortedBeds.add(bedRm);
+                else {
+                    smaller.add(bedRm);
+                }
+            }
+        }
     }
 
-    private void partitionInitial(Bear pivot, ArrayList<Bed> smaller, ArrayList<Bed> greater){
+    private void partitionLeft(Bear pivot, ArrayList<Bed> smaller, ArrayList<Bed> greater){
+        for(int i = 0; i < smaller.size(); ++i){
+            if(pivot.compareTo(smaller.get(i)) <= 0){
+                Bed bedRm = smaller.remove(i);
+
+                if(pivot.compareTo(bedRm) == 0)
+                    sortedBeds.add(bedRm);
+                else {
+                    smaller.add(bedRm);
+                }
+            }
+        }
+    }
+
+    private void partitionInitial(Bear pivot, HashMap<Bed, Boolean> mapState){
         for(Bed bed: beds){
             if(bed.compareTo(pivot) < 0) {
-                smaller.add(bed);
+                mapState.put(bed, true);
             }
             else if(bed.compareTo(pivot) > 0){
-                greater.add(bed);
+                mapState.put(bed, false);
             }
             else{
                 sortedBeds.add(bed);
@@ -67,15 +92,13 @@ public class BnBSolver {
      * Returns List of Bears such that the ith Bear is the same size as the ith Bed of solvedBeds().
      */
     public List<Bear> solvedBears() {
-        // TODO: Fix me.
-        return null;
+        return bears;
     }
 
     /**
      * Returns List of Beds such that the ith Bear is the same size as the ith Bear of solvedBears().
      */
     public List<Bed> solvedBeds() {
-        // TODO: Fix me.
-        return null;
+        return sortedBeds;
     }
 }
