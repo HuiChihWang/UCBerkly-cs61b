@@ -164,7 +164,6 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
         int[] idxArray = new int[2];
         idxArray[0] = (int) (Left / gridLength);
         idxArray[1] = (int)(Right / gridLength);
-
         return idxArray;
     }
 
