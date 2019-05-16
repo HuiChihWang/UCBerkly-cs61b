@@ -4,6 +4,7 @@ import bearmaps.hw4.streetmap.Node;
 import bearmaps.hw4.streetmap.StreetMapGraph;
 import bearmaps.proj2ab.KDTree;
 import bearmaps.proj2ab.Point;
+import edu.princeton.cs.algs4.TrieSET;
 
 import java.util.*;
 
@@ -16,13 +17,16 @@ import java.util.*;
  */
 public class AugmentedStreetMapGraph extends StreetMapGraph {
 
-    KDTree kdtreeWholeMap;
+    private KDTree kdtreeWholeMap;
     private HashMap<Point, Node> mapPointNode;
+    private HashMap<String, String> mapCleanOrigin;
+    private TrieSET locationSet;
 
     public AugmentedStreetMapGraph(String dbPath) {
         super(dbPath);
         List<Node> nodesOnMap= this.getNodes();
         createKDTreeFromNodeSet(nodesOnMap);
+        createLocationSet(nodesOnMap);
     }
 
     private void createKDTreeFromNodeSet(List<Node> nodesOnMap){
@@ -37,6 +41,19 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
             }
         }
         kdtreeWholeMap = new KDTree(pointSetOnMap);
+    }
+
+    private void createLocationSet(List<Node> nodesOnMap){
+        locationSet = new TrieSET();
+        mapCleanOrigin = new HashMap<>();
+
+        for(Node node: nodesOnMap){
+            if(node.name() != null) {
+                String cleanName = cleanString(node.name());
+                locationSet.add(cleanName);
+                mapCleanOrigin.put(cleanName, node.name());
+            }
+        }
     }
 
     /**
@@ -61,7 +78,14 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * cleaned <code>prefix</code>.
      */
     public List<String> getLocationsByPrefix(String prefix) {
-        return new LinkedList<>();
+        String cleanPrefix = cleanString(prefix);
+        List<String> matchCandidates = new LinkedList<>();
+
+        for(String matchResult: locationSet.keysWithPrefix(cleanPrefix)){
+            matchCandidates.add(mapCleanOrigin.get(matchResult));
+        }
+
+        return matchCandidates;
     }
 
     /**
