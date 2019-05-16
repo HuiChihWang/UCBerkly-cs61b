@@ -83,11 +83,17 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
      */
     @Override
     public Map<String, Object> processRequest(Map<String, Double> requestParams, Response response) {
-        System.out.println("yo, wanna know the parameters given by the web browser? They are:");
+//        System.out.println("yo, wanna know the parameters given by the web browser? They are:");
         System.out.println(requestParams);
         Map<String, Object> results = new HashMap<>();
-        System.out.println("Since you haven't implemented RasterAPIHandler.processRequest, nothing is displayed in "
-                + "your browser.");
+//        System.out.println("Since you haven't implemented RasterAPIHandler.processRequest, nothing is displayed in "
+//                + "your browser.");
+
+        if(!checkValidInput(requestParams)){
+            results.put("query_success", false);
+            return results;
+        }
+
 
         double leftTopLon = requestParams.get("ullon");
         double rightBottomLon = requestParams.get("lrlon");
@@ -97,20 +103,24 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
         double queryBoxHeight = requestParams.get("h");
 
         double targetLonDPP = (rightBottomLon - leftTopLon) / queryBoxWidth;
-        double startLonDPP = (ROOT_LRLON - ROOT_ULLON) / TILE_SIZE;
+        double startLonDPP = (ROOT_LRLON - ROOT_ULLON) / (double) TILE_SIZE;
+
 
         int level = 0;
-        while(startLonDPP > targetLonDPP){
+        while(startLonDPP > targetLonDPP && level < MAXIMUM_DEPTH){
             startLonDPP /= 2.;
             level += 1;
         }
 
-        double gridSize = Math.pow(2., level);
-        double gridLengthLon = (ROOT_LRLON - ROOT_ULLON) / gridSize;
-        double gridLengthLat = (ROOT_ULLAT - ROOT_LRLAT) / gridSize;
+        double gridSizeAllMap = Math.pow(2., level);
+        double gridLengthLon = (ROOT_LRLON - ROOT_ULLON) / gridSizeAllMap;
+        double gridLengthLat = (ROOT_LRLAT - ROOT_ULLAT) / gridSizeAllMap;
 
         int[] BoxLongtitudeIdx = findBoxIdx(leftTopLon - ROOT_ULLON, rightBottomLon - ROOT_ULLON, gridLengthLon);
-        int[] BoxLatitudeIdx = findBoxIdx(rightBottomLat - ROOT_LRLAT, leftTopLat - ROOT_LRLAT, gridLengthLat);
+        int[] BoxLatitudeIdx = findBoxIdx(leftTopLat - ROOT_ULLAT, rightBottomLat - ROOT_ULLAT, gridLengthLat);
+
+        convertToValidBoxIdx(BoxLongtitudeIdx, (int) gridSizeAllMap);
+        convertToValidBoxIdx(BoxLatitudeIdx, (int) gridSizeAllMap);
 
         int longtitudeIdxStart = BoxLongtitudeIdx[0];
         int longtitudeIdxEnd = BoxLongtitudeIdx[1];
@@ -128,22 +138,22 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
 
             int j = 0;
             for(int lonIdx = longtitudeIdxStart; lonIdx <= longtitudeIdxEnd; ++lonIdx){
-                imageNames[i][j] = String.format("d%d_x%d_y%d.png", level, latIdx, lonIdx);
+                imageNames[i][j] = String.format("d%d_x%d_y%d.png", level, lonIdx, latIdx);
                 j += 1;
             }
             i += 1;
         }
 
         double queryBoxLeftTopLongtitude = ROOT_ULLON + longtitudeIdxStart * gridLengthLon;
+        double queryBoxLeftTopLatitude = ROOT_ULLAT + latitudeIdxStart * gridLengthLat;
         double queryBoxRightBottomLongtitude = queryBoxLeftTopLongtitude + queryBoxGridSizeLon * gridLengthLon;
-        double queryBoxRightBottomLatitude = ROOT_LRLAT + latitudeIdxStart * gridLengthLat;
-        double queryBoxLefTopLatitude = queryBoxRightBottomLatitude + queryBoxGridSizeLat * gridLengthLat;
+        double queryBoxRightBottomLatitude = queryBoxLeftTopLatitude + queryBoxGridSizeLat * gridLengthLat;
 
         results.put("render_grid", imageNames);
         results.put("raster_ul_lon", queryBoxLeftTopLongtitude);
+        results.put("raster_ul_lat", queryBoxLeftTopLatitude);
         results.put("raster_lr_lon", queryBoxRightBottomLongtitude);
         results.put("raster_lr_lat", queryBoxRightBottomLatitude);
-        results.put("raster_ul_lat", queryBoxLefTopLatitude);
         results.put("depth" , level);
         results.put("query_success", true);
 
@@ -153,13 +163,41 @@ public class RasterAPIHandler extends APIRouteHandler<Map<String, Double>, Map<S
     private int[] findBoxIdx(double Left, double Right, double gridLength){
         int[] idxArray = new int[2];
         idxArray[0] = (int) (Left / gridLength);
-
-        if(Right == gridLength)
-            idxArray[1] = (int)(Right / gridLength) - 1;
-        else
-            idxArray[1] = (int)(Right / gridLength);
+        idxArray[1] = (int)(Right / gridLength);
 
         return idxArray;
+    }
+
+    private boolean checkValidInput(Map<String, Double> requestParams){
+        double leftTopLon = requestParams.get("ullon");
+        double rightBottomLon = requestParams.get("lrlon");
+        double leftTopLat = requestParams.get("ullat");
+        double rightBottomLat = requestParams.get("lrlat");
+        double queryBoxWidth = requestParams.get("w");
+        double queryBoxHeight = requestParams.get("h");
+
+        if(queryBoxWidth < 0 || queryBoxHeight < 0){
+            return false;
+        }
+
+        if(leftTopLon >= rightBottomLon || leftTopLat <= rightBottomLat){
+            return false;
+        }
+
+        if(leftTopLon >= ROOT_LRLON || rightBottomLon <= ROOT_ULLON){
+            return false;
+        }
+
+        if(leftTopLat <= ROOT_LRLAT || rightBottomLon >= ROOT_ULLAT){
+            return false;
+        }
+
+        return true;
+    }
+
+    private void convertToValidBoxIdx(int[] boxIdx, int gridSize){
+        boxIdx[0] = Math.max(0, boxIdx[0]);
+        boxIdx[1] = Math.min(gridSize - 1, boxIdx[1]);
     }
 
     @Override

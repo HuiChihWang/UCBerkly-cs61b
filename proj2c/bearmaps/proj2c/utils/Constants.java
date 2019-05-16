@@ -39,6 +39,8 @@ public class Constants {
     /** Each tile is 256x256 pixels. */
     public static final int TILE_SIZE = 256;
 
+    public static final int MAXIMUM_DEPTH = 7;
+
     public static AugmentedStreetMapGraph SEMANTIC_STREET_GRAPH;
 
     /**
