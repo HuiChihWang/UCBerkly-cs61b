@@ -20,6 +20,7 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
     private KDTree kdtreeWholeMap;
     private HashMap<Point, Node> mapPointNode;
     private HashMap<String, HashSet<String>> mapCleanOrigin;
+    private HashMap<String, HashSet<Node>> mapLocationNode;
     private TrieSET locationSet;
 
     public AugmentedStreetMapGraph(String dbPath) {
@@ -47,9 +48,9 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
     private void createLocationSet(List<Node> nodesOnMap){
         locationSet = new TrieSET();
         mapCleanOrigin = new HashMap<>();
+        mapLocationNode = new HashMap<>();
 
         for(Node node: nodesOnMap){
-
             if(node.name() != null) {
                 String cleanName = cleanString(node.name());
                 locationSet.add(cleanName);
@@ -58,6 +59,11 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
                     mapCleanOrigin.put(cleanName, new HashSet<>());
                 }
                 mapCleanOrigin.get(cleanName).add(node.name());
+
+                if(!mapLocationNode.containsKey(node.name())){
+                    mapLocationNode.put(node.name(), new HashSet<>());
+                }
+                mapLocationNode.get(node.name()).add(node);
             }
         }
     }
@@ -110,7 +116,22 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
      * "id" -> Number, The id of the node. <br>
      */
     public List<Map<String, Object>> getLocations(String locationName) {
-        return new LinkedList<>();
+        String cleanLocationName = cleanString(locationName);
+        List<Map<String, Object>> matchLocation = new LinkedList<>();
+        String cleanLongestMatch = locationSet.longestPrefixOf(cleanLocationName);
+
+        for(String location: mapCleanOrigin.get(cleanLongestMatch)){
+            for(Node node: mapLocationNode.get(location)){
+                Map<String, Object> match = new HashMap<>();
+                match.put("lat", node.lat());
+                match.put("lon", node.lon());
+                match.put("name", node.name());
+                match.put("id", node.id());
+
+                matchLocation.add(match);
+            }
+        }
+        return matchLocation;
     }
 
 
