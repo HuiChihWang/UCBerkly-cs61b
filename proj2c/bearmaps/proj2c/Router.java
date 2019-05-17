@@ -3,6 +3,8 @@ package bearmaps.proj2c;
 import bearmaps.hw4.AStarSolver;
 import bearmaps.hw4.WeirdSolver;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -44,7 +46,30 @@ public class Router {
      */
     public static List<NavigationDirection> routeDirections(AugmentedStreetMapGraph g, List<Long> route) {
         /* fill in for part IV */
-        return null;
+        List<NavigationDirection> navigateRoute = new ArrayList<>();
+        NavigationDirection startNavigate = initNavigateStart(g, route);
+        navigateRoute.add(startNavigate);
+
+        NavigationDirection navigateOneWay = new NavigationDirection();
+        for(int routeIdx = 1; routeIdx < route.size(); ++routeIdx){
+
+
+            double distFromPrev = es
+        }
+
+    }
+
+    private static void UpdateNavigateDirection(){
+
+    }
+
+    private static NavigationDirection initNavigateStart(AugmentedStreetMapGraph g, List<Long> route){
+        Long start = route.get(0);
+        NavigationDirection startNavigate = new NavigationDirection();
+        startNavigate.direction = NavigationDirection.START;
+        startNavigate.way = g.name(start);
+
+        return startNavigate;
     }
 
     /**
@@ -234,6 +259,25 @@ public class Router {
             double x = Math.cos(phi1) * Math.sin(phi2);
             x -= Math.sin(phi1) * Math.cos(phi2) * Math.cos(lambda2 - lambda1);
             return Math.toDegrees(Math.atan2(y, x));
+        }
+
+        public static int findDirection(double bearing){
+            if(Math.abs(bearing) <= 15.){
+                return 1;
+            }
+            else if(Math.abs(bearing) <= 30.){
+                return bearing >=0 ? 2 : 3;
+            }
+
+            else if(Math.abs(bearing) <= 100.){
+                return bearing >=0 ? 4 : 5;
+            }
+
+            else if(Math.abs(bearing) > 100){
+                return bearing >=0 ? 6 : 7;
+            }
+
+            return -1;
         }
     }
 }
