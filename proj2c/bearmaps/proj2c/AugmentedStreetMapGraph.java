@@ -19,14 +19,15 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
 
     private KDTree kdtreeWholeMap;
     private HashMap<Point, Node> mapPointNode;
-    private HashMap<String, String> mapCleanOrigin;
+    private HashMap<String, HashSet<String>> mapCleanOrigin;
     private TrieSET locationSet;
 
     public AugmentedStreetMapGraph(String dbPath) {
         super(dbPath);
         List<Node> nodesOnMap= this.getNodes();
-        createKDTreeFromNodeSet(nodesOnMap);
         createLocationSet(nodesOnMap);
+        createKDTreeFromNodeSet(nodesOnMap);
+
     }
 
     private void createKDTreeFromNodeSet(List<Node> nodesOnMap){
@@ -48,10 +49,15 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
         mapCleanOrigin = new HashMap<>();
 
         for(Node node: nodesOnMap){
+
             if(node.name() != null) {
                 String cleanName = cleanString(node.name());
                 locationSet.add(cleanName);
-                mapCleanOrigin.put(cleanName, node.name());
+
+                if(!mapCleanOrigin.containsKey(cleanName)){
+                    mapCleanOrigin.put(cleanName, new HashSet<>());
+                }
+                mapCleanOrigin.get(cleanName).add(node.name());
             }
         }
     }
@@ -82,7 +88,9 @@ public class AugmentedStreetMapGraph extends StreetMapGraph {
         List<String> matchCandidates = new LinkedList<>();
 
         for(String matchResult: locationSet.keysWithPrefix(cleanPrefix)){
-            matchCandidates.add(mapCleanOrigin.get(matchResult));
+            for(String origin: mapCleanOrigin.get(matchResult)) {
+                matchCandidates.add(origin);
+            }
         }
 
         return matchCandidates;
