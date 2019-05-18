@@ -1,6 +1,7 @@
 package bearmaps.proj2c;
 
 import bearmaps.hw4.AStarSolver;
+import bearmaps.hw4.WeightedEdge;
 import bearmaps.hw4.WeirdSolver;
 
 import java.util.ArrayList;
@@ -47,29 +48,39 @@ public class Router {
     public static List<NavigationDirection> routeDirections(AugmentedStreetMapGraph g, List<Long> route) {
         /* fill in for part IV */
         List<NavigationDirection> navigateRoute = new ArrayList<>();
-        NavigationDirection startNavigate = initNavigateStart(g, route);
-        navigateRoute.add(startNavigate);
 
-        NavigationDirection navigateOneWay = new NavigationDirection();
-        for(int routeIdx = 1; routeIdx < route.size(); ++routeIdx){
+        Edge prev, current;
+        prev = new Edge(g, route.get(0), route.get(1));
+        double distAcc = prev.dist;
+        int navigateOption = NavigationDirection.START;
+        for(int routeIdx = 1; routeIdx < route.size()-1; ++routeIdx){
+            current = new Edge(g, route.get(routeIdx), route.get(routeIdx + 1));
 
+            if(CheckNeedUpdateNavigation(prev, current)){
+                NavigationDirection navigateGuide = NavigationDirection.createNavigation(navigateOption, prev.name, distAcc);
+                navigateRoute.add(navigateGuide);
+                //System.out.println(navigateGuide);
 
-            double distFromPrev = es
+                navigateOption = NavigationDirection.getDirection(prev.bearing, current.bearing);
+                distAcc = current.dist;
+            }
+            else {
+                distAcc += current.dist;
+            }
+
+            prev = current;
         }
 
+        NavigationDirection lastNavigationDirection = NavigationDirection.createNavigation(navigateOption, prev.name, distAcc);
+        navigateRoute.add(lastNavigationDirection);
+
+        return navigateRoute;
     }
 
-    private static void UpdateNavigateDirection(){
+    private static boolean CheckNeedUpdateNavigation(Edge prevRoute, Edge currentRoute){
+        //int navigsteOption = NavigationDirection.getDirection(prevRoute.bearing, currentRoute.bearing);
+        return !currentRoute.name.equals(prevRoute.name);
 
-    }
-
-    private static NavigationDirection initNavigateStart(AugmentedStreetMapGraph g, List<Long> route){
-        Long start = route.get(0);
-        NavigationDirection startNavigate = new NavigationDirection();
-        startNavigate.direction = NavigationDirection.START;
-        startNavigate.way = g.name(start);
-
-        return startNavigate;
     }
 
     /**
@@ -124,6 +135,14 @@ public class Router {
             this.direction = STRAIGHT;
             this.way = UNKNOWN_ROAD;
             this.distance = 0.0;
+        }
+
+        public static NavigationDirection createNavigation(int direction, String roadName, double dist){
+            NavigationDirection navigateGuide = new NavigationDirection();
+            navigateGuide.distance = dist;
+            navigateGuide.way = roadName;
+            navigateGuide.direction = direction;
+            return navigateGuide;
         }
 
         public String toString() {
@@ -260,24 +279,43 @@ public class Router {
             x -= Math.sin(phi1) * Math.cos(phi2) * Math.cos(lambda2 - lambda1);
             return Math.toDegrees(Math.atan2(y, x));
         }
+    }
 
-        public static int findDirection(double bearing){
-            if(Math.abs(bearing) <= 15.){
-                return 1;
-            }
-            else if(Math.abs(bearing) <= 30.){
-                return bearing >=0 ? 2 : 3;
-            }
+    private static class Edge{
+        private AugmentedStreetMapGraph g;
+        double bearing;
+        double dist;
+        Long start;
+        Long end;
+        String name;
 
-            else if(Math.abs(bearing) <= 100.){
-                return bearing >=0 ? 4 : 5;
-            }
+        Edge(AugmentedStreetMapGraph g, Long start, Long end){
+            this.g = g;
+            this.start = start;
+            this.end = end;
+            calculateBearing();
+            calculateDist();
+            getName();
+        }
 
-            else if(Math.abs(bearing) > 100){
-                return bearing >=0 ? 6 : 7;
-            }
+        private void calculateBearing(){
+            double startLat = g.lat(start);
+            double startLon = g.lon(start);
+            double endLat = g.lat(end);
+            double endLon = g.lon(end);
+            bearing = NavigationDirection.bearing(startLon, endLon, startLat, endLat);
+        }
 
-            return -1;
+        private void calculateDist(){
+            dist = g.estimatedDistanceToGoal(start, end);
+        }
+
+        private void getName(){
+            for(WeightedEdge<Long> edge: g.neighbors(start)){
+                if(edge.to().equals(end)){
+                    name = edge.getName();
+                }
+            }
         }
     }
 }
