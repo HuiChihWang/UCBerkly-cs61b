@@ -25,10 +25,6 @@ public class Percolation {
         UnionOfBottomVirtualSite = new WeightedQuickUnionUF(GridSize*GridSize +1);
     }
 
-    public static void main(String[] args){
-
-    }
-
     public void open(int row, int col){
         checkValidIndex(row, col);
         if(StatesHolder.GetState(row, col) == DataType.State.OPEN)

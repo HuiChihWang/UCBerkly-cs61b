@@ -4,22 +4,24 @@ import edu.princeton.cs.introcs.StdRandom;
 import edu.princeton.cs.introcs.StdStats;
 
 public class PercolationStats {
-    private PercolationFactory PercolationCreator;
     private int ExperimentTimes;
     private int TestGridSize;
     private double[] arrayPercolationThresh;
 
 
-    public PercolationStats(int N, int T, PercolationFactory pf){
-        if(N <= 0 || T <= 0)
+    public PercolationStats(int n, int trials){
+        if(n <= 0 || trials <= 0)
             throw new IllegalArgumentException();
 
-        PercolationCreator = pf;
-        ExperimentTimes = T;
-        TestGridSize = N;
+        ExperimentTimes = trials;
+        TestGridSize = n;
         arrayPercolationThresh = new double[ExperimentTimes];
 
         Simulate();
+    }
+
+    private Percolation createPercolation(int N){
+        return new Percolation(N);
     }
 
     private void Simulate(){
@@ -29,7 +31,7 @@ public class PercolationStats {
     }
 
     private double SimulateOneTime(){
-        Percolation pTester = PercolationCreator.make(TestGridSize);
+        Percolation pTester = createPercolation(TestGridSize);
         while(!pTester.percolates())
             RandomOpenSite(pTester);
 
@@ -60,12 +62,22 @@ public class PercolationStats {
         return StdStats.stddev(arrayPercolationThresh);
     }
 
-    public double confidenceLow(){
+    public double confidenceLo(){
         return mean() - 1.96*stddev()/Math.sqrt((double)ExperimentTimes);
     }
 
-    public double confideHigh(){
+    public double confideHi(){
         return mean() + 1.96*stddev()/Math.sqrt((double)ExperimentTimes);
     }
 
+    public static void main(String[] args){
+        int n = Integer.parseInt(args[0]);
+        int trials = Integer.parseInt(args[1]);
+
+        PercolationStats percolateState = new PercolationStats(n, trials);
+
+        System.out.println(String.format("mean = %f", percolateState.mean()));
+        System.out.println(String.format("stddev = %f", percolateState.stddev()));
+        System.out.println(String.format("stddev = [%f, %f]", percolateState.confidenceLo(), percolateState.confideHi()));
+    }
 }
